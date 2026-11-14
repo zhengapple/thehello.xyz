@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<title>exe病毒 - 爱毁电脑的命令行</title>
+	<style>
+        /* ========== 基础重置 ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* ========== 动态彩虹背景 ========== */
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; 
+            align-items: center;         
+            padding-top: 10vh;           
+            padding-bottom: 10vh;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            overflow-x: hidden; /* 允许竖向滚动，防止内容过长被截断 */
+            position: relative;
+            
+            background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000);
+            background-size: 400% 400%;
+            animation: rainbowBg 15s linear infinite;
+        }
+
+        @keyframes rainbowBg {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 暗色遮罩 */
+        body::before {
+            content: '';
+            position: fixed; 
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 0;
+        }
+
+        /* ========== 页面大标题 ========== */
+        .page-title {
+            position: relative;
+            z-index: 10;
+            font-size: 2.5rem;
+            color: #ffffff;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+            margin-bottom: 40px;
+            letter-spacing: 0.1em;
+            text-align: center;
+        }
+
+        /* ========== 容器：竖向排列 ========== */
+        .container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column; 
+            gap: 30px;              
+            align-items: center;    
+            width: 90%;
+            max-width: 800px;       /* 限制最大宽度，让卡片更好看 */
+            margin-bottom: 50px;    
+        }
+
+        /* ========== 毛玻璃下载卡片 ========== */
+        .glass-card {
+            width: 100%;            
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 35px 50px;     
+            border-radius: 24px;    
+            
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            text-align: center;
+            
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+        }
+
+        /* 悬浮反馈：变亮、上浮 */
+        .glass-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 45px 0 rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.25); 
+        }
+
+        /* 卡片内部文字 */
+        .card-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-desc {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.85);
+            line-height: 1.5;
+            margin-bottom: 25px;
+        }
+
+        /* 下载按钮样式 */
+        .download-btn {
+            display: inline-block;
+            padding: 12px 35px;
+            border-radius: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            white-space: nowrap;
+        }
+
+        .download-btn:hover {
+            background: #ffffff;
+            color: #d32f2f; /* 悬浮时文字变红，呼应病毒主题 */
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.8); 
+            transform: scale(1.05);
+        }
+
+        /* 手机端适配 */
+        @media (max-width: 768px) {
+            .page-title { font-size: 2rem; margin-bottom: 30px; }
+            .container { gap: 20px; }
+            .glass-card { padding: 25px 25px; }
+            .card-title { font-size: 1.5rem; }
+            .card-desc { font-size: 1rem; }
+            .download-btn { padding: 10px 25px; font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 页面标题 -->
+    <h1 class="page-title">EXE 病毒样本</h1>
+
+    <!-- 竖向容器 -->
+    <div class="container">
+        
+        <!-- 下载框 1 -->
+        <div class="glass-card">
+            <div>
+                <h3 class="card-title">样本名称：屏幕保护程序 Pro.exe</h3>
+                <p class="card-desc">请仔细阅读说明。本文件仅供安全研究与学习测试使用，请勿在实体机运行，建议在虚拟机（VMware / VirtualBox）中观察其行为。</p>
+            </div>
+            
+            <a href="../my/exe/virus/屏幕保护程序 Pro.exe" download class="download-btn">立即下载</a>
+        </div>
+
+        <!-- 下载框 2（新增） -->
+        <div class="glass-card">
+            <div>
+                <!-- 这里可以改成你第二个病毒的名称 -->
+                <h3 class="card-title">样本名称：屏幕保护程序 Pro.cpp</h3>
+                <p class="card-desc">请仔细阅读说明。本文件仅供安全研究与学习测试使用，请勿在实体机运行，建议在虚拟机（VMware / VirtualBox）中观察其行为。</p>
+            </div>
+            
+            <!-- 👇 这里的路径请改成你第二个文件的真实路径 👇 -->
+            <a href="../my/dm/cpp/屏幕保护程序 Pro.cpp" download class="download-btn">立即下载</a>
+        </div>
+
+    </div>
+
+</body>
+</html>

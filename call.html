@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<title>联系 - 爱毁电脑的命令行</title>
+	<style>
+        /* ========== 基础重置 ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* ========== 动态彩虹背景 ========== */
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; 
+            align-items: center;         
+            padding-top: 10vh;           
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            overflow-x: hidden; /* 允许竖向滚动，防止内容过长被截断 */
+            position: relative;
+            
+            background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000);
+            background-size: 400% 400%;
+            animation: rainbowBg 15s linear infinite;
+        }
+
+        @keyframes rainbowBg {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 暗色遮罩 */
+        body::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 0;
+            position: fixed; /* 让遮罩固定在屏幕上，滚动时不会消失 */
+        }
+
+        /* ========== 容器：改为竖向排列 ========== */
+        .container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column; /* 强制竖向排列 */
+            gap: 25px;              /* 卡片之间的垂直间距 */
+            align-items: center;    /* 水平居中 */
+            width: 90%;
+            margin-bottom: 50px;    /* 给底部的“介绍”留点空间 */
+        }
+
+        /* ========== 毛玻璃容器（放大了） ========== */
+        .glass-card {
+            display: inline-block; 
+            padding: 25px 60px;     /* 增加内边距，让卡片变得更大 */
+            border-radius: 24px;    /* 圆角也稍微变大 */
+            
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            text-align: center;
+            
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* 悬浮反馈 */
+        .glass-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 12px 40px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        /* ========== 文字及链接样式（放大了） ========== */
+        .my-text {
+            /* 最大字号从 2rem 放大到了 3.5rem */
+            font-size: clamp(1.5rem, 4vw, 3.5rem); 
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            color: #ffffff;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5), 0 0 40px rgba(255, 255, 255, 0.3);
+            animation: breathe 3s ease-in-out infinite alternate;
+            margin: 0;
+            white-space: nowrap; 
+        }
+
+        /* 统一链接样式 */
+        .link-style {
+            text-decoration: none;
+            color: inherit;
+            display: inline-block;
+            cursor: pointer; 
+        }
+
+        @keyframes breathe {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.03); }
+        }
+
+        /* ========== 标题样式 ========== */
+        .intro-title {
+            position: relative;
+            z-index: 10;
+            font-size: 2.5rem;
+            color: #ffffff;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+            margin-bottom: 50px;
+        }
+
+        /* 手机端适配 */
+        @media (max-width: 768px) {
+            .glass-card { padding: 20px 40px; width: 100%; max-width: 350px; }
+            .my-text { font-size: 1.8rem; } /* 手机端字号稍微固定一点 */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 容器：包裹三个卡片 -->
+    <div class="container">
+        
+        <!-- 卡片 1：B站 -->
+        <div class="glass-card">
+            <a href="https://space.bilibili.com/1939614444" target="_blank" class="my-text link-style">B站主页</a>
+        </div>
+
+        <!-- 卡片 2：GitHub -->
+        <div class="glass-card">
+            <a href="https://github.com/zhengapple" target="_blank" class="my-text link-style">GitHub主页</a>
+        </div>
+
+        <!-- 卡片 3：邮箱 -->
+        <div class="glass-card">
+            <a href="mailto:13149410602@163.com" class="my-text link-style">发送邮件</a>
+        </div>
+
+    </div>
+
+</body>
+</html>

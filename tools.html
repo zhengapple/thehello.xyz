@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<title>工具及其他 - 爱毁电脑的命令行</title>
+	<style>
+        /* ========== 基础重置 ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* ========== 动态彩虹背景 ========== */
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; 
+            align-items: center;         
+            padding-top: 10vh;           
+            padding-bottom: 10vh;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            overflow-x: hidden; 
+            position: relative;
+            
+            background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000);
+            background-size: 400% 400%;
+            animation: rainbowBg 15s linear infinite;
+        }
+
+        @keyframes rainbowBg {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 暗色遮罩 */
+        body::before {
+            content: '';
+            position: fixed; 
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45); /* 稍微加深遮罩，让网格更清晰 */
+            z-index: 0;
+        }
+
+        /* ========== 页面大标题 ========== */
+        .page-title {
+            position: relative;
+            z-index: 10;
+            font-size: 2.5rem;
+            color: #ffffff;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+            margin-bottom: 40px;
+            letter-spacing: 0.1em;
+        }
+
+        /* ========== 网格容器：6个框排列 ========== */
+        .tools-grid {
+            position: relative;
+            z-index: 10;
+            display: grid;
+            /* 电脑端默认一排 3 个，间距 25px */
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 25px; 
+            width: 90%;
+            max-width: 1100px; /* 限制最大宽度，防止在大屏幕上拉得太宽 */
+        }
+
+        /* ========== 毛玻璃下载卡片 ========== */
+        .glass-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* 让标题在上面，按钮在下面 */
+            padding: 30px 25px;    
+            border-radius: 20px;   
+            
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            text-align: center;
+            
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+        }
+
+        /* 悬浮反馈：变亮、上浮 */
+        .glass-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 15px 45px 0 rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.25); /* 悬浮时变得更亮白 */
+        }
+
+        /* 卡片内部文字 */
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-desc {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.4;
+            margin-bottom: 20px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2; /* 最多显示两行 */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            height: 2.6em; /* 固定高度，保证卡片对齐 */
+        }
+
+        /* 下载按钮样式 */
+        .download-btn {
+            display: inline-block;
+            padding: 10px 25px;
+            border-radius: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-weight: bold;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            white-space: nowrap;
+        }
+
+        .download-btn:hover {
+            background: #ffffff;
+            color: #0067c0; /* 悬浮时文字变蓝 */
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.8); /* 按钮发光 */
+            transform: scale(1.05);
+        }
+
+        /* ========== 响应式适配 ========== */
+        /* 平板端：一排 2 个 */
+        @media (max-width: 1024px) {
+            .tools-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        
+        /* 手机端：一排 1 个 */
+        @media (max-width: 768px) {
+            .tools-grid { grid-template-columns: 1fr; max-width: 350px; }
+            .page-title { font-size: 2rem; margin-bottom: 30px; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1 class="page-title">工具及其他</h1>
+
+    <!-- 网格容器 -->
+    <div class="tools-grid">
+        
+        <!-- 下载框 1 -->
+        <div class="glass-card">
+            <div>
+                <h3 class="card-title">二维码生成器 Pro</h3>
+                <p class="card-desc">快速生成各种各样的二维码</p>
+            </div>
+            <a href="my\exe\二维码生成器 Pro.exe" class="download-btn" target="_blank">立即下载</a>
+        </div>
+
+        <!-- 下载框 2 -->
+        <div class="glass-card">
+            <div>
+                <h3 class="card-title">金丝猴桌宠</h3>
+                <p class="card-desc">一只桌宠陪你一起工作、玩耍</p>
+            </div>
+            <a href="my\exe\金丝猴桌宠.exe" class="download-btn" target="_blank">立即下载</a>
+        </div>
+
+        <!-- 下载框 3 -->
+        <div class="glass-card">
+            <div>
+                <h3 class="card-title">天气预报程序</h3>
+                <p class="card-desc">随时查看天气预报</p>
+            </div>
+            <a href="my\exe\天气预报程序.exe" class="download-btn" target="_blank">立即下载</a>
+        </div>
+
+        <!-- 下载框 4 -->
+        <div class="glass-card">
+            <div>
+                <h3 class="card-title">源代码</h3>
+                <p class="card-desc">上面程序的源代码</p>
+            </div>
+            <a href="my\dm\py\二维码生成器 Pro.py" class="download-btn" target="_blank">立即下载</a>
+        </div>
+
+        <!-- 下载框 5 -->
+        <div class="glass-card">
+            <div>
+                <h3 class="card-title">源代码</h3>
+                <p class="card-desc">上面程序的源代码</p>
+            </div>
+            <a href="my\dm\py\金丝猴桌宠.py" class="download-btn" target="_blank">立即下载</a>
+        </div>
+
+        <!-- 下载框 6 -->
+        <div class="glass-card">
+            <div>
+                <h3 class="card-title">源代码</h3>
+                <p class="card-desc">上面程序的源代码</p>
+            </div>
+            <a href="my\dm\py\天气预报程序.py" class="download-btn" target="_blank">立即下载</a>
+        </div>
+
+    </div>
+
+</body>
+</html>
