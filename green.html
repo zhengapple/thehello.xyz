@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<title>源代码 - 爱毁电脑的命令行</title>
+	<style>
+        /* ========== 基础重置 ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* ========== 动态彩虹背景 ========== */
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; 
+            align-items: center;         
+            padding-top: 10vh;           
+            padding-bottom: 10vh; /* 底部留白，防滚动到底部贴边 */
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            overflow-x: hidden; 
+            position: relative;
+            
+            background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000);
+            background-size: 400% 400%;
+            animation: rainbowBg 15s linear infinite;
+        }
+
+        @keyframes rainbowBg {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 暗色遮罩（为了压暗背景，让前面的白色容器更突出） */
+        body::before {
+            content: '';
+            position: fixed; /* 固定在屏幕上 */
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5); /* 加深了一点遮罩，让白容器更显眼 */
+            z-index: 0;
+        }
+
+        /* ========== 亮白色毛玻璃容器 ========== */
+        .intro-container {
+            position: relative;
+            z-index: 10;
+            width: 90%;
+            max-width: 800px; /* 限制最大宽度，排版更好看 */
+            
+            /* 较高的亮白色透明度，看起来像白色的玻璃 */
+            background: rgba(255, 255, 255, 0.25); 
+            
+            /* 毛玻璃模糊特效 */
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            
+            /* 白色高光边框，增加立体感 */
+            border: 1px solid rgba(255, 255, 255, 0.6); 
+            border-radius: 24px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4), 
+                        inset 0 0 20px rgba(255, 255, 255, 0.2); /* 内部发光 */
+            
+            padding: 50px 60px;
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); /* 给内部文字加一点点阴影，确保清晰 */
+        }
+
+        /* ========== 文字排版样式 ========== */
+        .intro-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 30px;
+            letter-spacing: 0.05em;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
+        }
+
+        .intro-content {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            font-weight: 500;
+        }
+
+        .intro-content p {
+            margin-bottom: 20px;
+        }
+
+        /* 手机端适配 */
+        @media (max-width: 768px) {
+            .intro-container {
+                padding: 30px 25px;
+            }
+            .intro-title {
+                font-size: 2rem;
+            }
+            .intro-content {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 亮白色毛玻璃容器 -->
+    <div class="intro-container">
+        
+        <h1 class="intro-title">源代码</h1>
+        
+        <div class="intro-content">
+            <p>你好！欢迎来到 <strong>爱毁电脑的命令行</strong>。</p>
+            
+            <p>这里是一个热衷于 Windows、C++、Python 以及 Minecraft 的爱好者的自留地。平时喜欢折腾各种系统底层、写写代码，偶尔也会做一些有趣的小项目。</p>
+            
+            <p>如果你对我的项目感兴趣，或者只是想找我聊聊技术、游戏，欢迎通过联系页的 B站、GitHub 或邮箱联系我。</p>
+            
+			<p>项目地址：https://github.com/zhengapple/zhengapple/tree/main</p>
+			
+			<p>大家可以投稿， <strong>QQ：2844814896</strong>，但是只能周末测，感谢理解。</p>
+			
+        </div>
+
+    </div>
+
+</body>
+</html>
