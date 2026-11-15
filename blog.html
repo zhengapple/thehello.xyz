@@ -323,11 +323,126 @@
         <h2>🎉 欢迎来到秘密基地</h2>
         <p style="font-size: 1.2rem; line-height: 1.8; margin-top: 20px;">
             你好呀，能进到这里说明你不仅懂我，还知道我的密码！<br><br>
-            这里面可以放一些不想被公开的东西，比如：<br>
-            ✨ 我偷偷写了一半的代码草稿<br>
-            ✨ 一些私人的学习笔记<br>
-            ✨ 或者几张自己觉得拍得不错的照片<br><br>
-            <em>（在这里替换成你真正想放的私人内容吧！）</em>
+            我这里面放一些不想被公开的东西。<br>
+            ✨一、首次上传（新项目）
+1. 安装并配置 Git
+bash
+# 配置用户名和邮箱（全局一次即可）
+git config --global user.name "你的名字"
+git config --global user.email "你的邮箱"
+2. 在项目文件夹初始化仓库
+bash
+cd 你的项目文件夹
+git init
+3. 添加文件到暂存区
+bash
+# 添加所有文件
+git add .
+
+# 或者添加指定文件
+git add 文件名
+4. 提交
+bash
+git commit -m "第一次提交"
+5. 关联远程仓库
+先在 GitHub/Gitee 上新建一个空仓库，拿到仓库地址（如 https://github.com/用户名/仓库名.git），然后：
+
+bash
+git remote add origin https://github.com/用户名/仓库名.git
+6. 推送到远程
+bash
+# 首次推送，指定分支并建立关联
+git push -u origin main
+
+# 如果你的默认分支是 master，就写 master
+git push -u origin master
+注意：GitHub 新仓库默认分支是 main，老版本 Git 本地默认是 master。可以用 git branch 查看当前分支名。
+
+二、日常更新（已有仓库）
+修改代码后，只需三步：
+
+bash
+git add .
+git commit -m "修改说明"
+git push
+三、常见问题
+1. 推送时要输入账号密码？
+GitHub 已不支持密码推送，需要用 Personal Access Token 代替密码，或配置 SSH 密钥。Gitee 可用账号密码。
+
+2. 报错 failed to push some refs
+远程仓库有本地没有的提交，先拉取合并：
+
+bash
+git pull --rebase origin main
+git push
+3. 分支名不一致（main vs master）
+
+bash
+# 把本地 master 改名为 main
+git branch -M main
+git push -u origin main
+4. 想忽略某些文件（如 node_modules）
+在项目根目录建 .gitignore 文件，写入要忽略的文件/文件夹名。
+
+ <br>
+            ✨ 在 CMD 里让电脑说话，最直接的方法是用 PowerShell 或 VBScript 调用 Windows 自带的语音引擎（SAPI）。
+
+方法一：PowerShell 单行命令（推荐，最简单）
+直接在 CMD 窗口粘贴并回车，把引号里的文字换成你想说的话即可：
+
+cmd
+powershell -Command "Add-Type -AssemblyName System.Speech; (New-Object System.Speech.Synthesis.SpeechSynthesizer).Speak('你好，电脑说话了')"
+说明：这条命令会自动调用系统默认语音，朗读你输入的文字。如果电脑没声音，检查一下音量或扬声器是否正常。
+
+方法二：VBScript 临时脚本（兼容性好）
+如果 PowerShell 不可用，可以生成一个临时 VBS 脚本执行。在 CMD 里逐行输入：
+
+cmd
+echo Set s = CreateObject("SAPI.SpVoice") > talk.vbs
+echo s.Speak "你好，电脑说话了" >> talk.vbs
+cscript //nologo talk.vbs
+del talk.vbs
+说明：这会创建一个临时文件 talk.vbs，调用系统语音对象朗读文字，结束后自动删除。SAPI 在 Windows 7 到 11 上通常都能正常工作。
+
+实用小技巧
+说中文：Windows 10/11 一般自带中文语音，直接输入中文即可。如果读出来是英文发音，说明系统缺少中文语音包，需要在“设置 > 时间和语言 > 语音”里添加。
+
+调语速：PowerShell 方法里可以在 Speak 前加一句 $v.Rate = -2（范围约 -10 到 10，负数更慢），先创建变量 $v = New-Object System.Speech.Synthesis.SpeechSynthesizer 再调用。
+
+<br>
+            ✨ 在 CMD 里想“自动请求管理员权限”，通常不是在当前窗口里直接完成，而是让脚本检测到自己不是管理员时，自动弹 UAC 框并重新以管理员身份启动自己。
+
+最简洁、实用的方式是使用 mshta 或 PowerShell 的自提权代码，把下面这行放在批处理文件（.bat / .cmd）的最前面即可。
+
+最简方案（mshta）
+在批处理文件开头加入这一行：
+
+bat
+%1 mshta vbscript:CreateObject("Shell.Application").ShellExecute("cmd.exe","/c %~s0 ::","","runas",1)(window.close)&&exit
+原理：它会检查自己是否已经以管理员身份运行（通过 %1 参数标记）。如果不是，就调用 mshta 执行一段 VBScript，使用 ShellExecute 的 "runas" 动词触发 UAC 弹窗，以管理员身份重新启动这个批处理文件。
+
+注意：:: 不能删掉，否则脚本可能会陷入无限循环。
+
+备选方案（PowerShell）
+如果你的系统上 PowerShell 可用，也可以这样写：
+
+bat
+@echo off
+net session >nul 2>&1
+if %errorlevel% neq 0 (
+    powershell -Command "Start-Process '%~f0' -Verb RunAs"
+    exit /b
+)
+这段代码先用 net session 测试当前是否有管理员权限，如果没有，就用 PowerShell 的 Start-Process 加上 -Verb RunAs 参数来触发提权。
+
+关键点：runas 命令的区别
+很多人会想到 runas 命令，但它不适合用来“自动请求管理员权限”。runas 是“以其他用户身份运行”，它要求你输入那个管理员账户的密码，而且不会触发 UAC 的“是/否”授权框。如果你只是想让自己（当前已在管理员组里的账户）提权，上面提到的 mshta 或 PowerShell 方法才是正确的。
+
+如果不想改脚本
+如果你只是想手动操作，最直接的办法是：在开始菜单搜索 cmd，右键选择“以管理员身份运行”；或者为 cmd.exe 创建一个快捷方式，在属性里勾选“以管理员身份运行”。
+
+<br><br>
+            <em>我的秘密空间，本站在2026/11/14完成</em>
         </p>
         <button class="modal-btn btn-cancel" style="margin-top: 30px;" onclick="logout()">退出隐私模式</button>
     </div>
@@ -335,7 +450,7 @@
     <!-- JavaScript 逻辑 -->
     <script>
         // ================= 密码逻辑 =================
-        const SECRET_PASSWORD = "admin123"; 
+        const SECRET_PASSWORD = "84892330Dyj"; 
         const modal = document.getElementById('passwordModal');
         const input = document.getElementById('pwdInput');
         const publicContent = document.getElementById('public-content');
