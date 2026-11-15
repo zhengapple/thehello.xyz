@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<title>折腾日志 - 爱毁电脑的命令行</title>
+	<style>
+        /* ========== 基础重置 ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* ========== 动态彩虹背景 ========== */
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; 
+            align-items: center;         
+            padding-top: 8vh;           
+            padding-bottom: 10vh;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            overflow-x: hidden; 
+            position: relative;
+            
+            background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000);
+            background-size: 400% 400%;
+            animation: rainbowBg 15s linear infinite;
+        }
+
+        @keyframes rainbowBg {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 暗色遮罩 */
+        body::before {
+            content: '';
+            position: fixed; 
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 0;
+        }
+
+        /* ========== 右上角顶部按钮组 ========== */
+        .top-actions {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        /* ========== 通用弹窗 (模态框) ========== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            display: none; /* 默认隐藏 */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-box {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 40px 30px;
+            border-radius: 20px;
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 15px 45px rgba(0,0,0,0.4);
+        }
+
+        .modal-box h3 {
+            color: #fff;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .modal-box input, .modal-box textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            outline: none;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            background: rgba(255,255,255,0.8);
+            font-family: inherit;
+        }
+
+        .modal-box textarea {
+            height: 120px;
+            resize: none;
+        }
+
+        .modal-btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .btn-confirm { background: #0067c0; color: white; }
+        .btn-confirm:hover { background: #00509e; }
+        .btn-cancel { background: rgba(255,255,255,0.3); color: white; }
+        .btn-cancel:hover { background: rgba(255, 255, 255, 0.5); }
+
+        /* ========== 页面原有内容 ========== */
+        .page-title {
+            position: relative;
+            z-index: 10;
+            font-size: 2.5rem;
+            color: #ffffff;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+            margin-bottom: 40px;
+            letter-spacing: 0.1em;
+            text-align: center;
+        }
+
+        .blog-container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            width: 90%;
+            max-width: 900px;
+            margin-bottom: 50px;
+        }
+
+        .blog-card {
+            width: 100%;            
+            display: flex;
+            flex-direction: column;
+            padding: 35px 40px;     
+            border-radius: 24px;    
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+            text-align: left;
+        }
+
+        .blog-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 45px 0 rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.25); 
+        }
+
+        /* 标题栏容器：包含日期和删除按钮 */
+        .blog-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .blog-date {
+            font-size: 0.9rem;
+            color: #0067c0;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            letter-spacing: 0.05em;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        /* 删除按钮样式 */
+        .delete-btn {
+            background: rgba(220, 53, 69, 0.8);
+            color: white;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: bold;
+            transition: background 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            background: rgba(220, 53, 69, 1);
+            transform: scale(1.05);
+        }
+
+        .blog-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .blog-content {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.8;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .blog-content p { margin-bottom: 15px; }
+        .blog-content strong { color: #ffff00; }
+
+        /* ========== 隐藏的私人区域 ========== */
+        #private-content {
+            display: none;
+            position: relative;
+            z-index: 10;
+            width: 90%;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            color: #fff;
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.2);
+        }
+
+        #private-content h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-shadow: 0 0 15px rgba(255,255,255,0.8);
+        }
+
+        @media (max-width: 768px) {
+            .page-title { font-size: 2rem; margin-bottom: 30px; }
+            .blog-card { padding: 25px 20px; }
+            .blog-title { font-size: 1.4rem; }
+            .blog-content { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 右上角的按钮组 -->
+    <div class="top-actions">
+        <button class="action-btn" id="writeDiaryBtn" onclick="openUploadModal()">✍️ 写日记</button>
+        <button class="action-btn" id="privateBtn" onclick="openPasswordModal()">🔒 私人主页</button>
+    </div>
+
+    <!-- 密码输入弹窗 -->
+    <div class="modal-overlay" id="passwordModal">
+        <div class="modal-box">
+            <h3>请输入访问密码</h3>
+            <input type="password" id="pwdInput" placeholder="在此输入密码...">
+            <div class="modal-btn-group">
+                <button class="modal-btn btn-cancel" onclick="closePasswordModal()">取消</button>
+                <button class="modal-btn btn-confirm" onclick="checkPassword()">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 写日记弹窗 -->
+    <div class="modal-overlay" id="uploadModal">
+        <div class="modal-box">
+            <h3>上传新日记</h3>
+            <input type="text" id="diaryTitle" placeholder="日记标题...">
+            <textarea id="diaryContent" placeholder="在这里写下你的折腾记录..."></textarea>
+            <div class="modal-btn-group">
+                <button class="modal-btn btn-cancel" onclick="closeUploadModal()">取消</button>
+                <button class="modal-btn btn-confirm" onclick="saveDiary()">发布</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 公开的博客内容 -->
+    <div id="public-content" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+        <h1 class="page-title">折腾日志</h1>
+        
+        <!-- 这个容器里的内容会由下方的 JS 自动生成 -->
+        <div class="blog-container" id="blogContainer">
+            <!-- 动态插入日记的位置 -->
+        </div>
+    </div>
+
+    <!-- 私人秘密区域（默认隐藏） -->
+    <div id="private-content">
+        <h2>🎉 欢迎来到秘密基地</h2>
+        <p style="font-size: 1.2rem; line-height: 1.8; margin-top: 20px;">
+            你好呀，能进到这里说明你不仅懂我，还知道我的密码！<br><br>
+            这里面可以放一些不想被公开的东西，比如：<br>
+            ✨ 我偷偷写了一半的代码草稿<br>
+            ✨ 一些私人的学习笔记<br>
+            ✨ 或者几张自己觉得拍得不错的照片<br><br>
+            <em>（在这里替换成你真正想放的私人内容吧！）</em>
+        </p>
+        <button class="modal-btn btn-cancel" style="margin-top: 30px;" onclick="logout()">退出隐私模式</button>
+    </div>
+
+    <!-- JavaScript 逻辑 -->
+    <script>
+        // ================= 密码逻辑 =================
+        const SECRET_PASSWORD = "admin123"; 
+        const modal = document.getElementById('passwordModal');
+        const input = document.getElementById('pwdInput');
+        const publicContent = document.getElementById('public-content');
+        const privateContent = document.getElementById('private-content');
+        
+        // 获取按钮的 DOM 元素
+        const writeDiaryBtn = document.getElementById('writeDiaryBtn');
+        const privateBtn = document.getElementById('privateBtn');
+
+        function openPasswordModal() {
+            modal.style.display = 'flex';
+            input.value = '';
+            input.focus();
+        }
+
+        function closePasswordModal() {
+            modal.style.display = 'none';
+        }
+
+        function checkPassword() {
+            if (input.value === SECRET_PASSWORD) {
+                closePasswordModal();
+                
+                // 切换显示内容
+                publicContent.style.display = 'none';
+                privateContent.style.display = 'block';
+                
+                // 修改按钮状态
+                privateBtn.innerText = '🔓 已进入隐私模式';
+                writeDiaryBtn.style.display = 'none'; // 隐藏写日记按钮
+            } else {
+                alert("密码错误！请重新输入。");
+                input.value = '';
+                input.focus();
+            }
+        }
+
+        function logout() {
+            // 切换回公开内容
+            privateContent.style.display = 'none';
+            publicContent.style.display = 'flex';
+            
+            // 恢复按钮状态
+            privateBtn.innerText = '🔒 私人主页';
+            writeDiaryBtn.style.display = 'inline-block'; // 重新显示写日记按钮
+        }
+
+        input.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') checkPassword();
+        });
+
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) closePasswordModal();
+        });
+
+
+        // ================= 博客日记逻辑 =================
+        
+        // 1. 默认的日记数据（你原来的三篇，不可删除）
+        const defaultDiaries = [
+            {
+                id: "default-1",
+                date: "2026年11月15日",
+                title: "测试自己写的二维码生成器，被中文乱码搞疯了",
+                content: `
+                    <p>今天在测试网页<strong>工具页</strong>里的那个“二维码生成器 Pro”。本来以为调用个现成的库就能搞定，结果还是踩了一堆坑。</p>
+                    <p>第一个坑是<strong>中文乱码</strong>。我输入了一段中文想生成二维码，结果扫出来的全都是问号。查了半天源码才发现，在生成前得把中文文本用 <code>utf-8</code> 编码处理一下，不然那个库根本识别不了。</p>
+                    <p>第二个坑是<strong>添加 Logo 导致无法扫描</strong>。为了让二维码好看，我在中间贴了个小图标，结果中间白边没留够，直接把二维码的“定位角”给挡住了。最后我手动调整了半天比例，才勉强能扫出来。</p>
+                    <p>虽然折腾了一下午，但看着扫码后成功跳出来的文字，感觉还是值得的。工具已经传到网盘了，大家可以去测试一下。</p>
+					<p>----爱毁电脑的命令行</p>
+                `
+            },
+            {
+                id: "default-2",
+                date: "2026年11月14日",
+                title: "BAT 病毒测试踩坑：千万不要在实体机上玩！",
+                content: `
+                    <p>为了更新网站上的 <strong>BAT 病毒样本库</strong>，我今天在虚拟机里测试了几个杀伤力比较大的脚本（比如那个 \`2.0.bat\` 和 \`bat病毒5.0.bat\`）。</p>
+                    <p>本来以为只是一些简单的死循环或者弹窗，结果其中一个脚本把我的虚拟机 <strong>注册表给干碎了</strong>，直接无限蓝屏重启，连安全模式都进不去。最后只能把虚拟机的快照回滚，白折腾了一个小时。</p>
+                    <p>这里真的要提醒大家：<strong>我的网站里“有害区”的那些脚本，绝对绝对不要在实体机（你平常用的电脑）上运行！</strong> 如果只是好奇，在“无害区”下载一些模拟蓝屏、模拟报错的脚本玩玩就行了。折腾系统一时爽，数据丢失火葬场，千万记得备份！</p>
+					<p>----爱毁电脑的命令行</p>
+                `
+            },
+            {
+                id: "default-3",
+                date: "2026年11月10日",
+                title: "用 Python 写了一个金丝猴桌宠，好玩！",
+                content: `
+                    <p>今天终于把那个 <strong>金丝猴桌宠</strong> 搞定了。其实核心逻辑不难，主要就是用 \`tkinter\` 画个透明窗口，然后让一只猴子图片在上面走来走去。</p>
+                    <p>最折腾的是<strong>“窗口置顶”和“透明穿透”</strong>，查了半天资料才发现，原来要用到 \`win32gui\` 和 \`win32con\` 这些系统级别的库，稍微改错一个参数，猴子就卡在屏幕左上角不动了。</p>
+                    <p>不过看着那只猴子在桌面上跟着鼠标跑来跑去，还是很有成就感的。源码已经放在 <a href="tools.html" style="color:#00ffff;">工具页</a> 了，大家可以去下载玩玩。下一步准备给它加个“点击互动”的功能，如果卡壳了再来写日记！</p>
+					<p>----爱毁电脑的命令行</p>
+                `
+            }
+        ];
+
+        // 2. 渲染日记列表的函数
+        const blogContainer = document.getElementById('blogContainer');
+        
+        function renderDiaries() {
+            // 清空容器
+            blogContainer.innerHTML = '';
+            
+            // 获取用户上传的日记
+            let userDiaries = JSON.parse(localStorage.getItem('userDiaries')) || [];
+            
+            // 将用户的日记拼在你的默认日记前面
+            const allDiaries = [...userDiaries, ...defaultDiaries];
+
+            // 循环生成 HTML
+            allDiaries.forEach(diary => {
+                const article = document.createElement('article');
+                article.className = 'blog-card';
+                
+                // 判断是否是用户上传的（如果有 id 且不是 default 开头，则显示删除按钮）
+                const isUserDiary = diary.id && !diary.id.startsWith('default');
+                const deleteBtnHTML = isUserDiary 
+                    ? `<button class="delete-btn" onclick="deleteDiary('${diary.id}')">🗑️ 删除</button>` 
+                    : '';
+
+                article.innerHTML = `
+                    <div class="blog-header">
+                        <span class="blog-date">${diary.date}</span>
+                        ${deleteBtnHTML}
+                    </div>
+                    <h2 class="blog-title">${diary.title}</h2>
+                    <div class="blog-content">${diary.content}</div>
+                `;
+                blogContainer.appendChild(article);
+            });
+        }
+
+        // 页面加载时立刻渲染一次
+        renderDiaries();
+
+        // 3. 上传日记的相关逻辑
+        const uploadModal = document.getElementById('uploadModal');
+
+        function openUploadModal() {
+            uploadModal.style.display = 'flex';
+            document.getElementById('diaryTitle').value = '';
+            document.getElementById('diaryContent').value = '';
+        }
+
+        function closeUploadModal() {
+            uploadModal.style.display = 'none';
+        }
+
+        function saveDiary() {
+            const title = document.getElementById('diaryTitle').value.trim();
+            const content = document.getElementById('diaryContent').value.trim();
+
+            if (!title || !content) {
+                alert("标题和内容都不能为空哦！");
+                return;
+            }
+
+            // 生成当前日期
+            const now = new Date();
+            const dateStr = `${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日`;
+
+            // 组装新日记对象（生成唯一 ID 方便删除）
+            const newDiary = {
+                id: "user-" + Date.now(),
+                date: dateStr,
+                title: title,
+                content: `<p>${content.replace(/\n/g, '</p><p>')}</p>`
+            };
+
+            // 获取现有数据，推入新数据，然后存回 localStorage
+            let userDiaries = JSON.parse(localStorage.getItem('userDiaries')) || [];
+            userDiaries.unshift(newDiary); // 放在最前面
+            localStorage.setItem('userDiaries', JSON.stringify(userDiaries));
+
+            // 重新渲染并关闭弹窗
+            renderDiaries();
+            closeUploadModal();
+        }
+
+        // 4. 删除日记的函数
+        function deleteDiary(diaryId) {
+            if (confirm("确定要删除这篇日记吗？删除后无法恢复哦！")) {
+                let userDiaries = JSON.parse(localStorage.getItem('userDiaries')) || [];
+                // 过滤掉要删除的那一篇
+                userDiaries = userDiaries.filter(diary => diary.id !== diaryId);
+                // 重新保存到 localStorage
+                localStorage.setItem('userDiaries', JSON.stringify(userDiaries));
+                // 重新渲染页面
+                renderDiaries();
+            }
+        }
+
+        // 点击遮罩关闭上传弹窗
+        uploadModal.addEventListener('click', function(e) {
+            if (e.target === uploadModal) closeUploadModal();
+        });
+    </script>
+
+</body>
+</html>
