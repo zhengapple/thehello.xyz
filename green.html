@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>绿色代码雨 · 经典版 - 爱毁电脑的命令行</title>
+<style>
+    html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #000;
+    }
+    canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+    #tip {
+        position: fixed;
+        top: 10px;
+        right: 15px;
+        color: #00ff41;
+        font-family: monospace;
+        font-size: 14px;
+        opacity: 0.8;
+        user-select: none;
+        pointer-events: none;
+        transition: opacity 1s;
+    }
+</style>
+</head>
+<body>
+<canvas id="matrix"></canvas>
+<div id="tip">按 F11 全屏 / 点击页面也可全屏</div>
+
+<script>
+    var canvas = document.getElementById("matrix");
+    var ctx = canvas.getContext("2d");
+
+    // 让画布铺满整个窗口
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+
+    // 字符集：数字、字母
+    var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    var charArray = chars.split("");
+
+    // ★ 字体大小
+    var fontSize = 15;
+
+    var columns = Math.floor(canvas.width / fontSize);
+    var drops = [];
+
+    // 每一列初始的 y 坐标（随机）
+    for (var i = 0; i < columns; i++) {
+        drops[i] = Math.floor(Math.random() * canvas.height / fontSize);
+    }
+
+    // 每一列的速度（让部分列更快）
+    var speeds = [];
+    for (var i = 0; i < columns; i++) {
+        speeds[i] = (Math.random() > 0.7) ? 2 : 1;
+    }
+
+    // 渐变：从顶部亮绿到底部暗绿
+    function makeGradient() {
+        var g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        g.addColorStop(0, "#00ff41");   // 顶部亮绿
+        g.addColorStop(0.5, "#00cc33"); // 中间
+        g.addColorStop(1, "#003300");   // 底部暗绿
+        return g;
+    }
+
+    // 绘制函数
+    function draw() {
+        // 半透明黑色覆盖，形成拖尾（数字越小，尾巴越长）
+        ctx.fillStyle = "rgba(0, 0, 0, 0.06)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.font = fontSize + "px monospace";
+        ctx.textBaseline = "top";
+
+        var gradient = makeGradient();
+
+        for (var i = 0; i < drops.length; i++) {
+            // 随机取一个字符
+            var text = charArray[Math.floor(Math.random() * charArray.length)];
+            var x = i * fontSize;
+            var y = drops[i] * fontSize;
+
+            // 闪烁：偶发亮白或亮绿高亮
+            if (Math.random() > 0.98) {
+                ctx.fillStyle = "#aaffaa";  // 亮白绿
+            } else {
+                ctx.fillStyle = gradient;   // 普通渐变绿
+            }
+            ctx.fillText(text, x, y);
+
+            // 到达底部后，随机回到顶部
+            if (y > canvas.height && Math.random() > 0.975) {
+                drops[i] = 0;
+            }
+            drops[i] += speeds[i];  // 按各自速度下落
+        }
+    }
+
+    // 每 33 毫秒绘制一帧，约 30 FPS
+    setInterval(draw, 33);
+
+    // 3 秒后隐藏提示
+    setTimeout(function () {
+        document.getElementById("tip").style.opacity = "0";
+    }, 3000);
+
+    // 点击页面进入全屏
+    document.body.addEventListener("click", function () {
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen();
+        }
+    });
+</script>
+</body>
+</html>
